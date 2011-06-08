@@ -7,17 +7,20 @@ include Term::ANSIColor
 
 STDOUT.sync = true
 
+
 options = {
  :directory_to_watch => "/Users/nfelger/dev/songkick",
  :remote_host        => 'of1-dev-nfelger',
- :remote_dir         => "dev/songkick"
+ :remote_dir         => "dev/songkick",
+ :verbose            => ARGV.any?{|arg| ['-v', '--verbose'].include?(arg)}
 }
 
 
 def sync(options)
   print "\033[14D", red, bold, "sünking...    ", reset
   start = Time.now
-  cmd = "rsync -varx --delete -e ssh --filter='. #{options[:directory_to_watch]}/rsync.filter' #{options[:directory_to_watch]}/ #{options[:remote_host]}:#{options[:remote_dir]}/"
+  verbosity = options[:verbose] ? 'v' : 'q'
+  cmd = "rsync -#{verbosity}arx --delete -e ssh --filter='. #{options[:directory_to_watch]}/rsync.filter' #{options[:directory_to_watch]}/ #{options[:remote_host]}:#{options[:remote_dir]}/"
   system(cmd)
   $0 = "Last sünked #{Time.now.strftime("%X")}"
   print "\033[14D"; print green, bold, "ready ", reset, "(#{(Time.now - start).to_i.to_s.rjust(5, " ")}s)", reset
